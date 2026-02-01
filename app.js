@@ -268,4 +268,142 @@
     ];
 
     if (type === "課程") return [
-      `第1段｜先穩定：用「${mt}
+      `第1段｜先穩定：用「${mt}」建立情緒降噪流程`,
+      `第2段｜看見：辨識觸發點與慣性反應（讓自己回得來）${add}`,
+      `第3段｜換說法：一人一句說得出口的話（降低衝突）`,
+      `第4段｜回家作業：小步練功（可追蹤、可累積）`
+    ];
+
+    return [
+      `開場定錨：今天不是來變好，是來少扛一點`,
+      `體驗站1｜情緒急救：用「${mt}」把心站穩${add}`,
+      `體驗站2｜溝通轉譯：把衝動變成選擇（說得出口）`,
+      `體驗站3｜關係修復：帶走一個「回家就能做」的小行動`,
+      `結尾祝福：把愛留一條回家的路（合照/承諾卡可選）`
+    ];
+  }
+
+  function buildDeliverables(type) {
+    if (type === "演講") return [
+      "現場體驗流程一頁（可拍照帶走）",
+      "工具連結清單（主工具＋副工具）",
+      "一句話模板：在衝突前先把心站穩"
+    ];
+    if (type === "課程") return [
+      "每週練習單（或LINE提醒文案）",
+      "工具使用指引（大人/孩子/親子版本）",
+      "結業帶走：個人化「幸福教養小抄」"
+    ];
+    return [
+      "活動流程表（可交行政/主辦）",
+      "體驗工具連結＋回家練習卡",
+      "現場共創提案文字（可直接對外提報）"
+    ];
+  }
+
+  function buildRationale() {
+    return [
+      "情緒升高時，大腦會進入壓力模式；先降噪，前額葉才有空間做選擇",
+      "用工具把「暫停」做出來：不是壓抑，而是把方向盤拿回來",
+      "幸福教養的核心不是控制孩子，而是讓關係回線：方向對了，當下即幸福"
+    ];
+  }
+
+  function buildClosing() {
+    return "「孩子不需要你完美，他需要你回得來。」";
+  }
+
+  // ---------- Utils ----------
+  function shorten(s, n) {
+    if (!s) return "";
+    const t = String(s);
+    return t.length > n ? t.slice(0, n) + "…" : t;
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+  function escapeAttr(s) { return escapeHtml(s); }
+
+  function updateMeta() {
+    const count = state.selectedIds.size;
+    $("#metaInfo").textContent = `已勾選工具：${count} 個（建議 1 主 + 0~2 副）`;
+  }
+
+  // ---------- Events ----------
+  function bindEvents() {
+    // seg buttons
+    document.querySelectorAll(".segbtn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".segbtn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.type = btn.getAttribute("data-type") || "演講";
+        $("#copyHint").textContent = "";
+      });
+    });
+
+    $("#toolSearch").addEventListener("input", renderToolList);
+
+    $("#btnClearTools").addEventListener("click", () => {
+      state.selectedIds.clear();
+      renderToolList();
+      $("#copyHint").textContent = "";
+    });
+
+    $("#btnGenerate").addEventListener("click", () => {
+      generateProposal();
+    });
+
+    $("#btnCopy").addEventListener("click", async () => {
+      const text = $("#output").value || "";
+      if (!text.trim()) { $("#copyHint").textContent = "⚠️ 先生成提案"; return; }
+      try {
+        await navigator.clipboard.writeText(text);
+        $("#copyHint").textContent = "✅ 已複製";
+      } catch {
+        // fallback
+        $("#output").select();
+        document.execCommand("copy");
+        $("#copyHint").textContent = "✅ 已複製（備援）";
+      }
+    });
+
+    $("#btnDownload").addEventListener("click", () => {
+      const text = $("#output").value || "";
+      if (!text.trim()) { $("#copyHint").textContent = "⚠️ 先生成提案"; return; }
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `angel-proposal-${Date.now()}.txt`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      $("#copyHint").textContent = "✅ 已下載";
+    });
+
+    $("#btnReloadData").addEventListener("click", () => loadTools());
+  }
+
+  // ---------- Service Worker ----------
+  async function registerSW() {
+    // If SW is broken/old cache, you can temporarily disable by returning early.
+    if (!("serviceWorker" in navigator)) return;
+    try {
+      await navigator.serviceWorker.register("./sw.js?v=100");
+    } catch (e) {
+      console.warn("SW register failed:", e);
+    }
+  }
+
+  // ---------- Init ----------
+  document.addEventListener("DOMContentLoaded", async () => {
+    bindEvents();
+    await loadTools();
+    await registerSW();
+  });
+
+})();
