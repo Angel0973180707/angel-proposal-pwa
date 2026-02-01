@@ -1,1 +1,132 @@
-<!doctype html><html><body>Angel Proposal PWA</body></html>
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Angel｜活動提案助手</title>
+
+  <meta name="theme-color" content="#8FB9A8" />
+  <meta name="description" content="Angel 活動提案助手｜演講 / 課程 / 活動，一鍵共創提案。" />
+
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" href="./assets/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="./assets/icons/icon-192.png" />
+
+  <link rel="stylesheet" href="./style.css?v=100" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="badge">Angel</div>
+      <div>
+        <div class="title">活動提案助手</div>
+        <div class="subtitle">演講｜課程｜活動 — 現場勾選，共創提案</div>
+      </div>
+    </div>
+    <div class="right">
+      <button id="btnReloadData" class="btn ghost" type="button">重新載入資料</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <h2>1｜提案設定</h2>
+
+      <div class="grid2">
+        <div class="field">
+          <label>提案類型</label>
+          <div class="seg" role="tablist" aria-label="proposal type">
+            <button type="button" class="segbtn active" data-type="演講">演講</button>
+            <button type="button" class="segbtn" data-type="課程">課程</button>
+            <button type="button" class="segbtn" data-type="活動">活動</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>場域/單位（可留空）</label>
+          <input id="org" type="text" placeholder="例：某國小｜親子館｜社福單位｜企業內訓" />
+        </div>
+
+        <div class="field">
+          <label>對象</label>
+          <select id="audience">
+            <option value="家長">家長</option>
+            <option value="老師">老師</option>
+            <option value="親子">親子</option>
+            <option value="行政/機構">行政/機構</option>
+            <option value="混合">混合</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>時長（可留空）</label>
+          <input id="duration" type="text" placeholder="例：60分鐘 / 2小時 / 半天 / 6週" />
+        </div>
+
+        <div class="field">
+          <label>人數（可留空）</label>
+          <input id="people" type="text" placeholder="例：30人 / 120人 / 全校" />
+        </div>
+
+        <div class="field">
+          <label>主題名稱（可留空）</label>
+          <input id="topic" type="text" placeholder="例：大人先穩定，孩子才會動" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>痛點關鍵字（用逗號分隔）</label>
+        <input id="pains" type="text" placeholder="例：吼叫,失控,焦慮,孩子不專心,親子卡住" />
+        <div class="hint">小提醒：你也可以直接貼「智多星」那一串關鍵字，這裡會做比對。</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="row">
+        <h2>2｜選工具（從 data/tools.csv 讀取）</h2>
+        <div class="toolsbar">
+          <input id="toolSearch" type="search" placeholder="搜尋：工具ID / 名稱 / 痛點 / 分類…" />
+          <button id="btnClearTools" class="btn ghost" type="button">清空勾選</button>
+        </div>
+      </div>
+
+      <div id="status" class="status">正在載入 tools.csv…</div>
+
+      <div id="toolList" class="toolList"></div>
+
+      <div class="note">
+        <div class="noteTitle">建議用法（現場最穩）</div>
+        <ul>
+          <li>先選 1 個「主工具」＋ 0～2 個「副工具」</li>
+          <li>主工具：決定提案主軸；副工具：補足流程（穩定／轉譯／行為／關係）</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="row">
+        <h2>3｜生成提案</h2>
+        <div class="actions">
+          <button id="btnGenerate" class="btn primary" type="button">一鍵生成提案</button>
+          <button id="btnCopy" class="btn" type="button">一鍵複製</button>
+          <button id="btnDownload" class="btn ghost" type="button">下載 TXT</button>
+        </div>
+      </div>
+
+      <textarea id="output" class="output" placeholder="生成後會出現在這裡…"></textarea>
+
+      <div class="mini">
+        <span id="metaInfo"></span>
+        <span id="copyHint" class="copyHint"></span>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div>Angel Proposal PWA · v1.0.0</div>
+      <div class="small">資料來源：<code>./data/tools.csv</code>（你改 CSV，提案就跟著變）</div>
+    </footer>
+  </main>
+
+  <script src="./app.js?v=100"></script>
+</body>
+</html>
