@@ -1,36 +1,39 @@
-// Simple offline-first service worker
-const CACHE = 'angel-proposal-pwa-v1';
-const ASSETS = [
-  './',
-  './index.html',
-  './style.css',
-  './app.js',
-  './manifest.json',
-  './assets/icons/icon-192.png',
-  './assets/icons/icon-512.png'
+const CACHE_NAME = "angel-proposal-v1.0.0";
+
+const CORE_ASSETS = [
+  "./",
+  "./index.html",
+  "./style.css",
+  "./app.js",
+  "./manifest.json"
 ];
 
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS))
   );
+  self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.map((k) => (k === CACHE ? null : caches.delete(k))))
-    ).then(() => self.clients.claim())
+    caches.keys().then(keys =>
+      Promise.all(keys.map(k => (k !== CACHE_NAME ? caches.delete(k) : null)))
+    )
   );
+  self.clients.claim();
 });
 
-self.addEventListener('fetch', (event) => {
-  const req = event.request;
+self.addEventListener("fetch", (event) => {
+  const url = new URL(event.request.url);
+
+  // 不快取 tools.csv，永遠走網路（避免被舊版卡住）
+  if (url.pathname.endsWith("/data/tools.csv") || url.pathname.includes("/data/tools.csv")) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(
-    caches.match(req).then((cached) => cached || fetch(req).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((cache) => cache.put(req, copy));
-      return res;
-    }).catch(() => cached))
+    caches.match(event.request).then((cached) => cached || fetch(event.request))
   );
 });
